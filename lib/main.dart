@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:khana/Log_in.dart';
 
 import 'Sign_up.dart';
-import 'order_page.dart';
 
 // main color Color.fromRGBO(107, 0 , 0, 1),
 class MyApp extends StatelessWidget {

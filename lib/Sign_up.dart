@@ -3,14 +3,36 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:khana/HomeMenu.dart';
 import 'package:khana/Log_in.dart';
-import 'package:khana/firebase_dbfile.dart';
-import 'package:khana/profile_page.dart';
 
-import 'Home_Page.dart';
 import 'main.dart';
 
+class firebase_db {
+  List<Map> data = [];
+  FirebaseDatabase database = FirebaseDatabase.instance;
+  String selectedKey = '';
 
+  insert(String emailController, String phoneController, String passController,
+      String NameController, String DateInput, String gender) {
+    String? key = database
+        .ref('User')
+        .push()
+        .key;
+
+    database
+        .ref('User')
+        .child(key!)
+        .set({
+      'name': NameController,
+      'email': emailController,
+      'phone': phoneController,
+      'pass': passController,
+      'date': DateInput,
+      'gender': gender,
+      'key': key});
+  }
+}
 class Sign_In extends StatefulWidget {
   const Sign_In({Key? key}) : super(key: key);
 
@@ -20,6 +42,21 @@ class Sign_In extends StatefulWidget {
 
 class _Sign_InState extends State<Sign_In> {
   bool valuefirst = false;
+  GlobalKey<FormState> signin= GlobalKey<FormState>();
+
+  void valid(){
+    if(signin.currentState!.validate()){
+      db.insert(email,phone,passt,name,date,gender);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+              const Log_In()));
+    }
+    else{
+      print("not");
+    }
+  }
 
   void initState() {
     dateInput.text = "";
@@ -45,7 +82,7 @@ class _Sign_InState extends State<Sign_In> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-        // resizeToAvoidBottomInset: false,
+      // resizeToAvoidBottomInset: false,
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -79,44 +116,57 @@ class _Sign_InState extends State<Sign_In> {
                     )),
               ), //Sign Up text
               SingleChildScrollView(
-                child: Container(
-                  height: 595,
-                  margin: EdgeInsets.only(top: 5),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
+                scrollDirection: Axis.vertical,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Form(
+                    key: signin,
                     child: Column(
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top:8,left: 4,right: 4,bottom: 4),
                           child: TextFormField(
-                              controller: NameController,
-                              keyboardType: TextInputType.text,
+                            controller: NameController,
+                            keyboardType: TextInputType.text,
 
-                              onChanged: (val){
-                                val.length <=4 ? nameb = false : nameb = true;
-                                // setState(() {});
-                                if(NameController.text.length>=5){
-                                  name=NameController.text;
-                                  setState(() {
+                            onChanged: (val){
+                              val.length <=4 ? nameb = false : nameb = true;
+                              // setState(() {});
+                              if(NameController.text.length>=5){
+                                name=NameController.text;
+                                setState(() {
 
-                                  });
-                                }
-                              },
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20.0)
-                                ),
-                                prefixIcon: Icon(Icons.perm_identity,color: Color.fromRGBO(107, 0, 0, 1),),
-                                hintText: 'please enter Name',
-                                labelText: 'Name',
-                                errorText: NameController.text.length <=4 ? (nameb ?
-                                nrr = 'Enter Valid Name' : null) : null,
-                              )),
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20.0)
+                              ),
+                              prefixIcon: Icon(Icons.perm_identity,color: Color.fromRGBO(107, 0, 0, 1),),
+                              hintText: 'please enter Name',
+                              labelText: 'Name',
+                              errorText: NameController.text.length <=4 ? (nameb ?
+                              nrr = 'Enter Valid Name' : null) : null,
+                            ),
+                            validator: (value){
+                              if(value!.isEmpty){
+                                return 'Enter Valid Name';
+                              }
+                              return null;
+                            },
+                          ),
 
                         ), //name
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: TextFormField(
+                              validator: (value){
+                                if(value!.isEmpty){
+                                  return 'Enter Valid Email';
+                                }
+                                return null;
+                              },
                               controller: EmailController,
                               keyboardType: TextInputType.emailAddress,
 
@@ -147,7 +197,13 @@ class _Sign_InState extends State<Sign_In> {
                         ),// String data as email
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: TextField(
+                          child: TextFormField(
+                            validator: (value){
+                              if(value!.isEmpty){
+                                return 'Enter Valid Phonenumber';
+                              }
+                              return null;
+                            },
                             controller: phoneController,
                             onChanged: (val){
                               prr=(val.length<10)?'enter a valid phone number*':null;
@@ -174,7 +230,13 @@ class _Sign_InState extends State<Sign_In> {
                         ),// String data as phone
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: TextField(
+                          child: TextFormField(
+                            validator: (value){
+                              if(dateInput.text!.isEmpty){
+                                return 'Enter Valid Date';
+                              }
+                              return null;
+                            },
                             controller: dateInput,
                             decoration: InputDecoration(
                                 border: OutlineInputBorder(
@@ -183,8 +245,8 @@ class _Sign_InState extends State<Sign_In> {
                                 // icon: Icon(Icons.calendar_month_outlined),
                                 labelText: "Date",
                                 prefixIcon:
-                                    Icon(Icons.date_range_outlined,color: Color.fromRGBO(107, 0, 0, 1),
-                            )),
+                                Icon(Icons.date_range_outlined,color: Color.fromRGBO(107, 0, 0, 1),
+                                )),
                             onTap: () async {
                               DateTime? pickedDate = await showDatePicker(
                                 context: context,
@@ -203,41 +265,47 @@ class _Sign_InState extends State<Sign_In> {
                           ),
                         ),// String data as date
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: PassController,
-                            onChanged: (val) {
-                              if(PassController.text.length==10){
-                                passt=PassController.text;
-                                setState(() {
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              validator: (value){
+                                if(value!.isEmpty){
+                                  return 'Enter Valid Password';
+                                }
+                                return null;
+                              },
+                              controller: PassController,
+                              onChanged: (val) {
+                                if(PassController.text.length>=8){
+                                  passt=PassController.text;
+                                  setState(() {
 
-                                });
-                              }
-                              passrr = (val.length < 8) ? "Enter valid password" : null;
-                              setState(() {});
-                            },
-                            obscureText: pass,
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10)),
-                                hintText: "Enter Password",
-                                labelText: "Password",
-                                errorText: passrr,
-                                prefixIcon: Icon(
-                                  Icons.password_outlined,
-                                  color: Color.fromRGBO(107, 0, 0, 1),
-                                ),
-                                suffixIcon: IconButton(
-                                    icon: Icon(
-                                      Icons.remove_red_eye,
-                                      color: Color.fromRGBO(107, 0, 0, 1),
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        pass = !pass;
-                                      });
-                                    })),
-                          )
+                                  });
+                                }
+                                passrr = (val.length < 8) ? "Enter valid password" : null;
+                                setState(() {});
+                              },
+                              obscureText: pass,
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  hintText: "Enter Password",
+                                  labelText: "Password",
+                                  errorText: passrr,
+                                  prefixIcon: Icon(
+                                    Icons.password_outlined,
+                                    color: Color.fromRGBO(107, 0, 0, 1),
+                                  ),
+                                  suffixIcon: IconButton(
+                                      icon: Icon(
+                                        Icons.remove_red_eye,
+                                        color: Color.fromRGBO(107, 0, 0, 1),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          pass = !pass;
+                                        });
+                                      })),
+                            )
                         ),//string data as passt
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -289,38 +357,35 @@ class _Sign_InState extends State<Sign_In> {
                               margin: EdgeInsets.only(top: 20),
                               width: 250,
                               child: ElevatedButton(
-                                onPressed: () {
-
-                                  if(name.isEmpty || passt.isEmpty || email.isEmpty || date.isEmpty || phone.isEmpty || gender!.isEmpty || !valuefirst){
-                                    null;
-                                  }
-                                  else{
-                                    db.insert(email,phone,passt,name,date,gender);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                            const ProfilePage()));
-                                  }
-                                },
+                                // onPressed: () {
+                                //
+                                //     // db.insert(email,phone,passt,name,date,gender);
+                                //     // Navigator.push(
+                                //     //     context,
+                                //     //     MaterialPageRoute(
+                                //     //         builder: (context) =>
+                                //     //         const HomeMenu()));
+                                //
+                                // },
+                                onPressed: valid,
                                 child: Text('SUBMIT',
                                     style: TextStyle(
                                         fontSize: 14, color: Colors.white)),
                                 style: ButtonStyle(
                                     foregroundColor:
-                                        MaterialStateProperty.all(
-                                            Colors.black54),
+                                    MaterialStateProperty.all(
+                                        Colors.black54),
                                     backgroundColor:
-                                        MaterialStateProperty.all(
-                                            Color.fromRGBO(107, 0, 0, 1)),
+                                    MaterialStateProperty.all(
+                                        Color.fromRGBO(107, 0, 0, 1)),
                                     shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
+                                        RoundedRectangleBorder>(
                                         RoundedRectangleBorder(
-                                      borderRadius:
+                                          borderRadius:
                                           BorderRadius.circular(20),
-                                      side: BorderSide(
-                                          color: Colors.transparent),
-                                    ))),
+                                          side: BorderSide(
+                                              color: Colors.transparent),
+                                        ))),
                               )
                           ),
                         ),
@@ -329,6 +394,7 @@ class _Sign_InState extends State<Sign_In> {
                   ),
                 ),
               ),
+              SizedBox(height: 70,),
               Container(
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(topRight: Radius.circular(20),topLeft: Radius.circular(20)),
@@ -362,7 +428,7 @@ class _Sign_InState extends State<Sign_In> {
                                   fontFamily: 'FontMain',
                                   fontSize: 16,
                                   color:
-                                      Color.fromRGBO(254, 132, 132, 1)),
+                                  Color.fromRGBO(254, 132, 132, 1)),
                             ),
                           )), // login text
                     ],
@@ -392,23 +458,6 @@ class TermAndCondition extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         title: Text("Khana Restaurant"),
-        // Row(
-        //   children: [
-        //     Container(
-        //       color: Colors.black,
-        //       width: 230,
-        //       height: 50,
-        //       alignment: Alignment.center,
-        //       child: Text("Khana Restaurant"),
-        //     ),
-        //     Container(
-        //       color: Colors.red,
-        //       width: 50,
-        //       height: 50,
-        //       child: Icon(Icons.add),
-        //     ),
-        //   ],
-        // ),
         centerTitle: true,
         backgroundColor: Color.fromRGBO(107, 0, 0, 1),
       ),

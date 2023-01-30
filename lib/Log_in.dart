@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:khana/HomeMenu.dart';
 import 'package:khana/Sign_up.dart';
 
-import 'Home_Page.dart';
 import 'main.dart';
 
 class Log_In extends StatefulWidget {
@@ -22,6 +24,24 @@ TextEditingController email_login = TextEditingController();
 TextEditingController pass_login = TextEditingController();
 
 class _Log_InState extends State<Log_In> {
+  FirebaseDatabase database = FirebaseDatabase.instance;
+  int e=0;
+
+  void _verifydata()async{
+    DatabaseReference ref=FirebaseDatabase.instance.ref('User');
+    DatabaseEvent d=await ref.once();
+    Map temp=d.snapshot.value as Map;
+    setState(() {});
+    temp.forEach((key, value) {
+      if(temp[key]["email"]==email_login.text && temp[key]["pass"]==pass_login.text){
+        Navigator.push(context, MaterialPageRoute(builder: ((context) => HomeMenu())));
+        e=1;
+      }
+      else{
+        e=2;
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,13 +50,24 @@ class _Log_InState extends State<Log_In> {
       body: Column(
         children: [
           Container(
-              margin: EdgeInsets.only(top: 50),
-              height: 150,
+              margin: EdgeInsets.only(top: 80),
+              height: 100,
               width: 150,
               child: Image(
                 image: AssetImage('assets/images/khana_png.png'),
                 fit: BoxFit.fitWidth,
               )),
+          Center(
+            child: Container(
+              width: 180,
+              height: 20,
+              // color: Colors.black12,
+              margin: EdgeInsets.only(left: 21),
+              child: Text("खाना से खाना लो, ओऱ खाते ऱहो !",
+                  style:
+                  TextStyle(fontSize: 14, color: Color.fromRGBO(107, 0, 0, 1))),
+            ),
+          ),
           Container(
             margin: EdgeInsets.only(top: 10, left: 70),
             height: 45,
@@ -124,22 +155,19 @@ class _Log_InState extends State<Log_In> {
               width: 250,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Home_Page()));
+                  _verifydata();
                 },
                 child: Text('SUBMIT',
                     style: TextStyle(fontSize: 14, color: Colors.white)),
                 style: ButtonStyle(
                     foregroundColor: MaterialStateProperty.all(Colors.black54),
                     backgroundColor:
-                        MaterialStateProperty.all(Color.fromRGBO(107, 0, 0, 1)),
+                    MaterialStateProperty.all(Color.fromRGBO(107, 0, 0, 1)),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: Colors.transparent),
-                    ))),
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Colors.transparent),
+                        ))),
               )),
           Container(
               height: 30,
@@ -198,9 +226,9 @@ class _Log_InState extends State<Log_In> {
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: Colors.transparent),
-                    ))),
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Colors.transparent),
+                        ))),
               )),
           Container(
               height: 45,
@@ -219,9 +247,9 @@ class _Log_InState extends State<Log_In> {
                   backgroundColor: MaterialStateProperty.all(Colors.red),
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(color: Colors.transparent),
-                  )),
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: Colors.transparent),
+                      )),
                 ),
               )),
           Container(
